@@ -15,6 +15,8 @@ const ctx = {
     CitiesInfo: '',
     selectedOption: 'McMeal',
     selectedCountry: 'France',
+    plotX: 'McMeal',
+    plotY: 'McMeal',
 };
 
 function createBarChart(container, data) {
@@ -336,47 +338,34 @@ function CreatePlot(main, data) {
         .append("xhtml:div")
         .attr("id", "scatterPlotContainer");
 
-    // Добавление кнопки для отображения графика
-    plotGroup.append("foreignObject")
-        .attr("x", 450)
-        .attr("y", 0)
-        .attr("width", 150)
-        .attr("height", 30)
-        .append("xhtml:button")
-        .text("Show Scatter Plot")
-        .on("click", function () {
-            scatterPlotContainer.html("");
-            const xOption = xSelect.property("value");
-            const yOption = ySelect.property("value");
-            createScatterPlot(scatterPlotContainer.node(), data, xOption, yOption);
-        });
-
     // Обработчик события для изменения осей графика
     [xSelect, ySelect].forEach(select => {
         select.on("change", function () {
             scatterPlotContainer.html("");
             const xOption = xSelect.property("value");
+            ctx.plotX = xOption;
             const yOption = ySelect.property("value");
-            createScatterPlot(scatterPlotContainer.node(), data, xOption, yOption);
+            ctx.plotY = yOption;
+            createScatterPlot(scatterPlotContainer.node(), data);
         });
     });
 
     // Первичное отображение графика
-    const initialXOption = xSelect.property("value");
-    const initialYOption = ySelect.property("value");
-    createScatterPlot(scatterPlotContainer.node(), data, initialXOption, initialYOption);
+    //const initialXOption = xSelect.property("value");
+    //const initialYOption = ySelect.property("value");
+    //createScatterPlot(scatterPlotContainer.node(), data, initialXOption, initialYOption);
 
 }
 
-function createScatterPlot(container, data, xOption, yOption) {
+function createScatterPlot(container, data) {
     const scatterPlot = d3.create('svg')
         .attr('width', 1000)
         .attr('height', 1000)
         .style("opacity", 1)
         .attr('transform', 'translate(50, 0)');
 
-    const xColumn = ctx.topfeatures[xOption];
-    const yColumn = ctx.topfeatures[yOption];
+    const xColumn = ctx.topfeatures[ctx.plotX];
+    const yColumn = ctx.topfeatures[ctx.plotY];
 
     const xScale = d3.scaleLinear()
         .domain([0, d3.max(data, d => d[xColumn])])
@@ -394,7 +383,7 @@ function createScatterPlot(container, data, xOption, yOption) {
         .attr("x", 250) // Расположение подписи оси X по центру
         .attr("y", 30)  // Расположение подписи ниже оси X
         .style("text-anchor", "middle")
-        .text(xOption);
+        .text(ctx.plotX);
 
     // Ось Y
     scatterPlot.append("g")
@@ -404,14 +393,16 @@ function createScatterPlot(container, data, xOption, yOption) {
         .attr("x", 30)  // Расположение подписи оси Y по центру
         .attr("y", 30)   // Расположение подписи слева от оси Y
         .style("text-anchor", "middle")
-        .text(yOption);
+        .text(ctx.plotY);
 
     const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
 
+    const filteredCities = data.filter(city => city.country === ctx.selectedCountry);
+
     scatterPlot.selectAll('circle')
-        .data(data)
+        .data(filteredCities)
         .enter().append('circle')
         .attr('cx', d => xScale(d[xColumn]))
         .attr('cy', d => yScale(d[yColumn]))
@@ -475,7 +466,6 @@ function CreateCountryMap(map){
               .style("fill", "lightblue"); // Возвращение оригинального цвета
       });
 }
-
 
 function CreateInfo(data){
     let main = d3.select("#info").style("float", "right");
