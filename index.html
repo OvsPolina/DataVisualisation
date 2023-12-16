@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>INF552 - 2023 - Project</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- https://d3js.org/ -->
+    <script type="text/javascript" src="js/d3.v7.min.js"></script>
+    <!-- Code -->
+    <script type="text/javascript" src="js/main.js"></script>
+    <style type="text/css">
+        .countryArea {
+            fill: rgb(232, 232, 232);
+        }
+
+        .countryArea:hover {
+            fill: darkgray;
+        }
+
+        .nutsArea {
+            fill: black;
+        }
+
+        .nutsArea:hover {
+            opacity: 0.8;
+        }
+
+        .countryBorder {
+            fill: none;
+            stroke-width: 1px;
+            stroke: rgb(70, 70, 70);
+        }
+
+        .nutsBorder {
+            fill: none;
+            stroke-width: 1px;
+            stroke: rgb(140, 140, 140);
+        }
+
+        .thinBorder {
+            stroke-width: 0.5px;
+        }
+    </style>
+</head>
+
+<body onload="createViz()">
+    <nav>
+        <div class="nav-wrapper">
+            <div class="container">
+          <a href="#" class="brand-logo"><img src="X_logo.png" height="60" width="50" alt=""></a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="">Project Info</a></li>
+            <li><a href="">About us</a></li>
+          </ul>
+        </div>
+        </div>
+    </nav>
+    <div id="main">
+    </div>
+</body>
+
+</html>
