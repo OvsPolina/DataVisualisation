@@ -1,0 +1,79 @@
+/* Nav bar */
+.brand-logo{
+    margin-top: 2px;
+}
+
+/* HTML layout */
+.wrapper{
+    display: flex;
+    flex-direction: column;
+    align-content: space-around;
+}
+.wrapper > * {
+    flex: 1 100%;
+}
+
+.maps{
+    order: 1;
+}
+.bar-charts{
+    order: 2;
+}
+.ml-analysis{
+    order: 3;
+}
+.about-project{
+    order: 4;
+    text-align: center;
+    margin: 10px 10px;
+    border-radius: 10px;
+}
+.about-us{
+    order: 5;
+    text-align: center;
+    margin: 10px 10px;
+    border-radius: 10px;
+}
+h3 {
+    display: inline-block;
+    margin: 0 auto;
+  }
+.about-us-wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+
+/* Map */
+.countryArea {
+    fill: rgb(232, 232, 232);
+}
+
+.countryArea:hover {
+    fill: darkgray;
+}
+
+.nutsArea {
+    fill: black;
+}
+
+.nutsArea:hover {
+    opacity: 0.8;
+}
+
+.countryBorder {
+    fill: none;
+    stroke-width: 1px;
+    stroke: rgb(70, 70, 70);
+}
+
+.nutsBorder {
+    fill: none;
+    stroke-width: 1px;
+    stroke: rgb(140, 140, 140);
+}
+
+.thinBorder {
+    stroke-width: 0.5px;
+}

@@ -23,55 +23,69 @@
     <script type="text/javascript" src="js/d3.v7.min.js"></script>
     <!-- Code -->
     <script type="text/javascript" src="js/main.js"></script>
-    <style type="text/css">
-        .countryArea {
-            fill: rgb(232, 232, 232);
-        }
-
-        .countryArea:hover {
-            fill: darkgray;
-        }
-
-        .nutsArea {
-            fill: black;
-        }
-
-        .nutsArea:hover {
-            opacity: 0.8;
-        }
-
-        .countryBorder {
-            fill: none;
-            stroke-width: 1px;
-            stroke: rgb(70, 70, 70);
-        }
-
-        .nutsBorder {
-            fill: none;
-            stroke-width: 1px;
-            stroke: rgb(140, 140, 140);
-        }
-
-        .thinBorder {
-            stroke-width: 0.5px;
-        }
-    </style>
 </head>
 
-<body onload="createViz()">
+<body>
     <nav>
         <div class="nav-wrapper">
             <div class="container">
-          <a href="#" class="brand-logo"><img src="X_logo.png" height="60" width="50" alt=""></a>
-          <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="">Project Info</a></li>
-            <li><a href="">About us</a></li>
-          </ul>
-        </div>
+                <a href="#" class="brand-logo"><img src="X_logo.png" height="60" width="50" alt=""></a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="#ml-analysis">ML Analysis</a></li>
+                    <li><a href="#project-info">Project Info</a></li>
+                    <li><a href="#about-us">About us</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
-    <div id="main">
+
+    <div class="wrapper">
+        <div class="maps" onload="createViz()">
+            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ex, nihil.</p>
+            <div class="main"></div>
+        </div>
+        <div class="bar-charts">
+            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ex, nihil.</p>
+        </div>
+        <div id="ml-analysis" class="ml-analysis">
+            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ex, nihil.</p>
+        </div>
+
+        <div id="about-project" class="about-project z-depth-1">
+            <div class="container">
+                <h3>Project info</h3>
+                <blockquote>Some highlight dsmvsd ksdfksd fsdkvn</blockquote>
+                <p>Links to the datasets with explanations and what/why we've done</p>
+            </div>
+        </div>
+
+        <div id="about-us" class="about-us z-depth-1">
+            <div class="container">
+                <h3>About us</h3>
+                <div class="about-us-wrapper">
+                    <div class="card blue-grey">
+                        <div class="card-content white-text">
+                            <span class="card-title">Polina Ovsiannikova</span>
+                            <p>Ecole Polytechnique X2021</p>
+                        </div>
+                    </div>
+                    <div class="card blue-grey">
+                        <div class="card-content white-text">
+                            <span class="card-title">Petr Shulzhenko</span>
+                            <p>Ecole Polytechnique X2021</p>
+                        </div>
+                    </div>
+                    <div class="card blue-grey">
+                        <div class="card-content white-text">
+                            <span class="card-title">Arina Ivanova</span>
+                            <p>Ecole Polytechnique X2021</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 </body>
 
 </html>
