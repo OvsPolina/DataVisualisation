@@ -12,7 +12,7 @@
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Import materialize.css-->
-    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+    <!-- <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/> -->
 
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -22,10 +22,12 @@
     <!-- https://d3js.org/ -->
     <script type="text/javascript" src="js/d3.v7.min.js"></script>
     <!-- Code -->
-    <script type="text/javascript" src="js/main.js"></script>
+    <script type="module" src="./js/maps.js"></script>
+    <script type="module" src="./js/barchart.js"></script>
+    <script type="module" src="js/main.js"></script>
 </head>
 
-<body>
+<body onload="createViz()">
     <nav>
         <div class="nav-wrapper">
             <div class="container">
@@ -40,13 +42,18 @@
     </nav>
 
     <div class="wrapper">
-        <div class="maps" onload="createViz()">
-            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ex, nihil.</p>
-            <div class="main"></div>
+        <div class="maps">
+            <div id="global-map"></div>
         </div>
-        <div class="bar-charts">
-            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ex, nihil.</p>
+
+
+        <div class="bar-charts" id="bar-charts">
+            <p>
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit, ut!
+            </p>
         </div>
+
+
         <div id="ml-analysis" class="ml-analysis">
             <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ex, nihil.</p>
         </div>
@@ -85,7 +92,6 @@
             </div>
         </div>
     </div>
-
 </body>
 
 </html>
