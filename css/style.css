@@ -1,7 +1,11 @@
 /* Nav bar */
+.nav-wrapper{
+    background-color: cadetblue;
+}
 .brand-logo{
     margin-top: 2px;
 }
+
 
 /* HTML layout */
 .wrapper{

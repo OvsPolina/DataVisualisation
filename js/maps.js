@@ -186,11 +186,11 @@ export function CreateMap(geo, cities, dataset){
                 return scaler(log_scaler(v)).toString();
                 });
         // Scale bar
-        const legendValues = [min_val, (min_val + max_val)/5,
-                                (min_val + max_val)/4,(min_val + max_val)/3, 
-                                (min_val + max_val)/2, 2*(min_val + max_val)/3,
-                                3*(min_val + max_val)/4, 4*(min_val + max_val)/5, 
-                                max_val];
+        const legendValues = [max_val, 4*(min_val + max_val)/5, 
+                                3*(min_val + max_val)/4, 2*(min_val + max_val)/3,
+                                (min_val + max_val)/2, (min_val + max_val)/3, 
+                                (min_val + max_val)/4, (min_val + max_val)/5,
+                                min_val];
         let bar = d3.select("#bar-svg").style("display", "block");
         console.log(legendValues);
         bar.selectAll("rect")
