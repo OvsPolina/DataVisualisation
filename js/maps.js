@@ -39,21 +39,46 @@ export function CreateMap(geo, cities, dataset){
       .append("path")
       .attr("d", pathGenerator)
       .attr("class", 'global-map-country')
-      .style("fill", "red") 
+      .style("fill", "darkcyan") 
       .style("background", 'black')
-      .style("stroke", "white");
+      .style("stroke", "white")
+      .style("stroke-width", "0.25");
 
     mapGroup.call(zoom);
     mapGroup.on("wheel.zoom", null); 
 
+    let country_color = 'darkcyan';
     mapGroup.selectAll("path")
       .on("mouseover", function (event, d) {
-          d3.select(this)
-              .style("fill", "orange"); 
-      })
+        country_color = d3.color(d3.select(this).style("fill"));
+        d3.select(this)
+        .style("fill", 'orange');
+        
+        // POP-UP
+        if (selected_feature !== undefined){
+            let dataset_country_name = geo_to_dataset[d.properties.admin];
+            if (!(dataset_country_name === 'NoData') ){
+                let v = countries_data[dataset_country_name][selected_feature].toFixed(2);
+                if (! (typeof v === 'undefined')){
+                    document.addEventListener('mousemove', function (event) {
+                        d3.select("#global-map-popup")
+                        .style("top", `${event.clientY}px`)
+                        .style("left", `${event.clientX - 200}px`);
+                      });
+                    d3.select("#global-map-popup-content")
+                      .text(`In ${dataset_country_name} it costs ${v}`);
+                    d3.select("#global-map-popup")
+                    .style("display", "block");
+                }   
+            }
+        }
+      })    
       .on("mouseout", function (event, d) {
-          d3.select(this)
-              .style("fill", "red"); 
+        d3.select(this)
+          .style("fill", country_color.toString());
+        d3.select("#global-map-popup")
+          .style("display", "none");    
+            
       })
       .on("click", function (event, d) {
         d3.select(this)
@@ -89,7 +114,11 @@ export function CreateMap(geo, cities, dataset){
                                 .on("click", function() {
                                     mapGroup.transition().call(zoom.scaleBy, 0.8);
                                 });
-
+    d3.select("#global-map-bttns")
+        .append("svg")
+        .attr("id", "bar-svg")
+        .style("display", "none");
+                    
 
         // Select form 
     // let selectContainer = bttns.append("div")
@@ -130,20 +159,19 @@ export function CreateMap(geo, cities, dataset){
     let geo_to_dataset = geo_to_dataset_country_names(geo.features, dataset);
     
     //  Update map
-
+    let selected_feature; //needed outside the scope to access in mouseover popup
     d3.select("#global-map-select")
     .on("change", function(){
         // console.log(instance_select.getSelectedValues());
         let selected_value = parseInt(d3.select(this).property("value"));
-        let selected_feature = options[selected_value + 1].text;
+        selected_feature = options[selected_value + 1].text;
+        let min_val = d3.min(countries_list, d => countries_data[d][selected_feature]);
+        let max_val = d3.max(countries_list, d => countries_data[d][selected_feature]);
         let log_scaler = d3.scaleLog()
-                            .domain([
-                                d3.min(countries_list, d => countries_data[d][selected_feature]),
-                                d3.max(countries_list, d => countries_data[d][selected_feature])
-                            ]);
+                            .domain([min_val, max_val]);
         let scaler = d3.scaleSequential(d3.interpolateViridis).domain([
-            log_scaler(d3.min(countries_list, d => countries_data[d][selected_feature])),
-            log_scaler(d3.max(countries_list, d => countries_data[d][selected_feature]))
+            log_scaler(min_val),
+            log_scaler(max_val)
         ]);
         mapGroup.selectAll("path")
                 .style("fill", function(d) {
@@ -156,12 +184,102 @@ export function CreateMap(geo, cities, dataset){
                     return 'gray';
                 }
                 return scaler(log_scaler(v)).toString();
-      });
+                });
+        // Scale bar
+        const legendValues = [min_val, (min_val + max_val)/5,
+                                (min_val + max_val)/4,(min_val + max_val)/3, 
+                                (min_val + max_val)/2, 2*(min_val + max_val)/3,
+                                3*(min_val + max_val)/4, 4*(min_val + max_val)/5, 
+                                max_val];
+        let bar = d3.select("#bar-svg").style("display", "block");
+        console.log(legendValues);
+        bar.selectAll("rect")
+        .data(legendValues)
+        .join(
+            enter => (
+                enter.append("rect")
+                .attr("x", 20)
+                .attr("y", (d, i) => i * 15)
+                .attr("width", 50)
+                .attr("height", 15)
+                .attr("fill", d => scaler(log_scaler(d)))
+            ),
+            update => (
+                update.call(
+                    update => {
+                        update.attr("fill", d => scaler(log_scaler(d)));
+                    }
+                )
+            ),
+            exit => (
+                exit.remove()
+            )
+        );
+        bar.selectAll("text")
+        .data(legendValues)
+        .join(
+            enter => (
+                enter.append("text")
+                .attr("x", 95)
+                .attr("y", (d, i) => i * 15 + 15)
+                .attr("text-anchor", "middle")
+                .text((d, i) => {
+                        if (i % 2 == 0){
+                            return d.toFixed(1)
+                        } else {return ''}})
+            ),
+            update => (
+                update.call(
+                    update => {
+                        update.text((d, i) => {
+                                        if (i % 2 == 0){
+                                            return d.toFixed(1)
+                                        } else {return ''}});
+                    }
+                )
+            ),
+            exit => (
+                exit.remove()
+            )
+        );         
+
+
+
+        // if (bar.node().childElementCount > 0){
+        //     bar.selectAll("rect")
+        //     .data(legendValues)
+        //     .enter()
+        //     .attr("fill", d => scaler(log_scaler(d)));
+
+        //     d3.select("#bar-svg").selectAll("text")
+        //     .data(legendValues)
+        //     .enter()
+        //     .text(d => d);
+        // } else {
+        //     bar.style("display", "block");
+        //     bar.selectAll("rect")
+        //     .data(legendValues)
+        //     .enter()
+        //     .append("rect")
+        //     .attr("x", 20)
+        //     .attr("y", (d, i) => i * 10)
+        //     .attr("width", 50)
+        //     .attr("height", 10)
+        //     .attr("fill", d => scaler(log_scaler(d)));
+
+            // d3.select("#bar-svg").selectAll("text")
+            // .data(legendValues)
+            // .enter()
+            // .append("text")
+            // .attr("x", 45)
+            // .attr("y", (d, i) => i * 5 + 2)
+            // .attr("text-anchor", "middle")
+            // .text(d => d);
+        // }
+        
+        
+        
     }); 
-    
-    
-
-
 };
 
 

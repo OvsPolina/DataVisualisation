@@ -68,7 +68,7 @@ export function process_country_info(cities_data){
         
         if (curr_country in countries_info){
             for (const key in city){
-                if (key in feature_code_to_value && city[key] != ''){
+                if (key in feature_code_to_value && city[key] != '' && parseFloat(city[key]) > 0){
                     let curr_feature = feature_code_to_value[key];
                     if (curr_feature in countries_info[curr_country]){
                         countries_info[curr_country][curr_feature] += parseFloat(city[key]);
@@ -81,7 +81,7 @@ export function process_country_info(cities_data){
         } else {
             let current_country_info = {};
             for (const key in city){
-                if (key in feature_code_to_value && city[key] != ''){
+                if (key in feature_code_to_value && city[key] != '' && parseFloat(city[key]) > 0){
                     let curr_feature = feature_code_to_value[key];
                     current_country_info[curr_feature] = parseFloat(city[key]);
                     counter = _update_counter(counter, curr_country, curr_feature);
