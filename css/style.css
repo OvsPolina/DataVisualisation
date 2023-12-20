@@ -19,11 +19,17 @@
 }
 #global-map{
     width: 100%;
-    height: 500px;
+    height: 550px;
 
     display: flex;
     flex-direction: column-reverse;
+    /* justify-content: space-around; */
 }
+/* .global-map-country:hover{
+    filter: brightness(1.5);
+} */
+
+
 .bar-charts{
     order: 2;
 }

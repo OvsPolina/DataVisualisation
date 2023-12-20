@@ -15,6 +15,7 @@ const ctx = {
 };
 
 import { CreateMap } from "./maps.js";
+import { process_country_info} from "./data_process.js";
 
 function loadData() {
     Promise.all([

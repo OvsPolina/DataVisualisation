@@ -1,3 +1,6 @@
+import { process_country_info, feature_code_to_value, geo_to_dataset_country_names} from "./data_process.js";
+
+
 export function CreateMap(geo, cities, dataset){
 
     // Set up the map dimensions
@@ -18,6 +21,10 @@ export function CreateMap(geo, cities, dataset){
     const zoom = d3.zoom()
     .scaleExtent([1, 8]) 
     .on("zoom", zoomed);
+
+    function zoomed(event) {
+        mapGroup.attr("transform", event.transform);
+    }
     
     // Create a group for the map features
     const mapGroup = Map.append("g")
@@ -31,6 +38,7 @@ export function CreateMap(geo, cities, dataset){
       .enter()
       .append("path")
       .attr("d", pathGenerator)
+      .attr("class", 'global-map-country')
       .style("fill", "red") 
       .style("background", 'black')
       .style("stroke", "white");
@@ -82,8 +90,11 @@ export function CreateMap(geo, cities, dataset){
                                     mapGroup.transition().call(zoom.scaleBy, 0.8);
                                 });
 
+
+        // Select form 
     // let selectContainer = bttns.append("div")
-                                // .attr("class", "input-field");
+    //                             .attr("class", "input-field")
+    //                             .attr("id", "global-map-select-container");
 
     d3.select("#global-map-bttns").append("select")
                             .attr("name", "global-map-select")
@@ -93,11 +104,17 @@ export function CreateMap(geo, cities, dataset){
             .attr('disabled', true)
             .attr('selected', true)
             .text('Choose feature');
-    var options = [
-        { value: '1', text: 'Option 1' },
-        { value: '2', text: 'Option 2' },
-        { value: '3', text: 'Option 3' }
-        ];
+    
+    let options = [{'value': -1, 'text':''}];
+    let feature_keys = Object.keys(feature_code_to_value);
+    for (let i = 0; i < feature_keys.length; i++) {
+        let opt = {
+          value: i,
+          text: feature_code_to_value[feature_keys[i]],
+        };
+        options.push(opt);
+      }
+
     d3.select("#global-map-select").selectAll('option')
         .data(options)
         .enter()
@@ -105,12 +122,45 @@ export function CreateMap(geo, cities, dataset){
         .attr('value', d => d.value)
         .text(d => d.text); 
 
-    var elems = document.getElementById('global-map-select');
-    var instances = M.FormSelect.init(elems, '');
+    let elem_select = document.getElementById('global-map-select');
+    let instance_select = M.FormSelect.init(elem_select, '');
+    
+    let countries_data = process_country_info(dataset);
+    let countries_list = Object.keys(countries_data);
+    let geo_to_dataset = geo_to_dataset_country_names(geo.features, dataset);
+    
+    //  Update map
 
-    function zoomed(event) {
-        mapGroup.attr("transform", event.transform);
-    }
+    d3.select("#global-map-select")
+    .on("change", function(){
+        // console.log(instance_select.getSelectedValues());
+        let selected_value = parseInt(d3.select(this).property("value"));
+        let selected_feature = options[selected_value + 1].text;
+        let log_scaler = d3.scaleLog()
+                            .domain([
+                                d3.min(countries_list, d => countries_data[d][selected_feature]),
+                                d3.max(countries_list, d => countries_data[d][selected_feature])
+                            ]);
+        let scaler = d3.scaleSequential(d3.interpolateViridis).domain([
+            log_scaler(d3.min(countries_list, d => countries_data[d][selected_feature])),
+            log_scaler(d3.max(countries_list, d => countries_data[d][selected_feature]))
+        ]);
+        mapGroup.selectAll("path")
+                .style("fill", function(d) {
+                let dataset_country = geo_to_dataset[d.properties.admin];
+                if (dataset_country === 'NoData'){
+                    return 'grey';
+                }
+                let v = countries_data[dataset_country][selected_feature];
+                if (typeof v === 'undefined'){
+                    return 'gray';
+                }
+                return scaler(log_scaler(v)).toString();
+      });
+    }); 
+    
+    
+
 
 };
 
