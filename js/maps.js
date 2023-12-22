@@ -433,7 +433,11 @@ export function selectedCountryInfo(selected_country){
 
             let country_vis = d3.select("#selected-country-map");//.append("div");
             //Select Feature
-            const selectContainer = country_vis.append("div")
+            let country_info_div = country_vis.append("div")
+                        .attr("id", "selected-country-info-div")
+                        .style("display", "flex")
+                        .style("flex-direction", "column");
+            const selectContainer = country_info_div.append("div")
                                             .attr("name", "country-div")
                                             .attr("id", "country-div")
                                             .attr("class", "dropdown-container")
@@ -474,7 +478,7 @@ export function selectedCountryInfo(selected_country){
             M.FormSelect.init(elem_select, '');
 
             //Barchart Container
-            let bar = country_vis.append("div")
+            let bar = country_info_div.append("div")
                                 .style("display", "flex")
                                 .attr("name", "country-bar")
                                 .attr("id", "country-bar")
