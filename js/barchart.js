@@ -20,7 +20,6 @@ function createTable(container, data) {
      const thead = table.append('thead');
      const tbody = table.append('tbody');
 
-     // Создание заголовка таблицы
      const headerRow = thead.append('tr');
      const headers = ['Place', 'City', 'Country', 'Price, USD'];
      headers.forEach(headerText => {
@@ -32,7 +31,7 @@ function createTable(container, data) {
      const sortedData = data.sort((a, b) => b[column] - a[column]).slice(0,10);
 
 
-     // Создание строк таблицы с данными
+     //Rows of a table
      sortedData.forEach((rowData, index) => {
          const row = tbody.append('tr');
          row.append('td').text(index + 1);
@@ -50,7 +49,6 @@ function createTable(container, data) {
         .attr('width', top.SVG_W)
         .attr('height', top.SVG_H/2)
         .style("opacity", 1);
-        //.attr('transform', 'translate(500, 50)');
 
     let column = top.topfeatures[top.selectedOption];
 
@@ -61,21 +59,17 @@ function createTable(container, data) {
 
     const sortedData = data.sort((a, b) => b[column] - a[column]).slice(0, 10);
 
-    //console.log(sortedData[0][column]);
-
+    //Scales for the barchart
     const xScale = d3.scaleBand()
         .domain(sortedData.map(d => d.city))
         .range([0, top.SVG_W - 100])
         .padding(0.3);
 
-    //console.log(column);
-
     const yScale = d3.scaleLinear()
         .domain([0, sortedData[0][column]])
         .range([(top.SVG_H / 2 - 100), 0]);
 
-    //console.log(d3.max(sortedData, d => d[column]));
-
+    //Barcharts
     chartGroup.selectAll('rect')
         .data(sortedData)
         .enter().append('rect')
@@ -86,33 +80,28 @@ function createTable(container, data) {
         .attr('fill', 'lightblue')
         .style("opacity", 1);
 
+    //Labels
     chartGroup.selectAll('text.bar-label')
         .data(sortedData)
         .enter()
         .append('text')
         .attr('class', 'bar-label')
-        .text(d => d[column]) // Use the data value as the label
+        .text(d => d[column]) 
         .attr('x', d => xScale(d['city']) + xScale.bandwidth()/2)
-        .attr('y', d => yScale(d[column]) - 5) // Adjust the position of the label
-        .attr('text-anchor', 'middle'); // Center the text horizontally
+        .attr('y', d => yScale(d[column]) - 5) 
+        .attr('text-anchor', 'middle'); 
 
+    //Y label
     chartGroup.append("g")
         .call(d3.axisLeft(yScale))
         .selectAll("text")
-        .attr("x", -15) // Adjust the distance of the labels from the axis
-        .attr("y", -15)  // Adjust the vertical position of the labels
-        .attr("dy", "1em") // Fine-tune the vertical alignment
-        .style("text-anchor", "middle") // Align text to the end of the axis
-        .attr("transform", "rotate(-45)"); // Center the text horizontally
+        .attr("x", -15) 
+        .attr("y", -15)  
+        .attr("dy", "1em")
+        .style("text-anchor", "middle") 
+        .attr("transform", "rotate(-45)"); 
 
-    // chartGroup.append('text')
-    //     .attr('y', -10)
-    //     .attr('x', 250)
-    //     .attr('dy', '1em')
-    //     .style('text-anchor', 'middle')
-    //     .text('USD');
-
-    // Adding city labels below each bar
+    // City labels below each bar
     chartGroup.selectAll('text.city-label')
         .data(sortedData)
         .enter()
@@ -120,7 +109,7 @@ function createTable(container, data) {
         .attr('class', 'city-label')
         .text(d => d.city)
         .attr('x', d => xScale(d.city) + xScale.bandwidth() / 2)
-        .attr('y', (top.SVG_H / 2 - 75)) // Adjust the vertical position of the city labels
+        .attr('y', (top.SVG_H / 2 - 75))
         .attr('text-anchor', 'middle')
         .attr('transform', (d) => `rotate(-15 ${xScale(d.city) + xScale.bandwidth() / 2},${(top.SVG_H / 2 - 75)})`);
 
@@ -130,19 +119,22 @@ function createTable(container, data) {
 
  function CreateTop(main, data){
     const topGroup = d3.select("#info");
+    
+    //Head Text
     topGroup.append("text")
-    .attr("x", top.SVG_W/2)  // Adjust the x-coordinate of the text
-    .attr("y", 20)  // Adjust the y-coordinate of the text
+    .attr("x", top.SVG_W/2) 
+    .attr("y", 20)  
     .text("Top 10 Cities in the World")
-    .style("font-size", "30px")  // Adjust the font size if needed
+    .style("font-size", "30px")  
     .style("fill", "black"); 
 
+    //Select Feature
     const selectContainer = topGroup.append("div")
-    .attr("class", "dropdown-container");
+                                    .attr("class", "dropdown-container");
 
     selectContainer.append("label")
-    .attr("for", "plot-selectX")
-    .text("Choose top feature");
+                    .attr("for", "plot-selectX")
+                    .text("Choose top feature");
     
     const topselect = selectContainer.append("select")
                             .attr("name", "top-select")
@@ -154,7 +146,7 @@ function createTable(container, data) {
             .text('Choose feature');
 
     topselect.selectAll("option")
-        .data(Object.keys(top.topfeatures))
+        .data(Object.keys(top.topfeatures)) //Adding options
         .enter()
         .append('option')
         .attr("value", function (d) {
@@ -165,11 +157,11 @@ function createTable(container, data) {
         });
 
     let elem_select = document.getElementById('top-select');
-    let instance_select = M.FormSelect.init(elem_select, '');
+    M.FormSelect.init(elem_select, '');
 
+    //Table Container
     const tableContainer = topGroup.append("foreignObject")
-         //.attr('transform', 'translate(0,50)') 
-         .attr("x", 50) // Adjust the x-coordinate to position it to the right
+         .attr("x", 50) 
          .attr("y", 50)
          .attr("width", top.SVG_W/2)
          .attr("height", top.SVG_H/2)
@@ -177,16 +169,16 @@ function createTable(container, data) {
          .style("display", "block")
          .attr("id", "tableContainer");
 
+     //Barchart Container
      const barChartContainer = topGroup.append("foreignObject")
          .attr("width", top.SVG_W/2)
          .attr("height", top.SVG_H)
-         .attr("transform", "translate(0, 0)") // Adjust the position as needed
+         .attr("transform", "translate(0, 0)")
          .append("xhtml:div")
          .style("display", "block")
          .attr("id", "barChartContainer");
 
-
-     // Обработчик события для выпадающего списка
+     // Events
      topselect.on("change", function () {
          top.selectedOption = d3.select(this).property("value");
          tableContainer.html("");
@@ -197,22 +189,21 @@ function createTable(container, data) {
  };
 
  function CreatePlot(main, data) {
-     //let Plot = main.append("svg").attr("id", "plot").attr("width", 1000).attr("height", 1000);
-     //const plotGroup = main.append("g").attr("id", "plotgroup").attr("transform", "translate(0, 0)");
-     // Создание выпадающих списков для выбора осей
+     // Head Text
      main.append("text")
-     .attr("x", top.SVG_W/2)  // Adjust the x-coordinate of the text
-     .attr("y", 20)  // Adjust the y-coordinate of the text
+     .attr("x", top.SVG_W/2)  
+     .attr("y", 20)  
      .text("Plot")
-     .style("font-size", "30px")  // Adjust the font size if needed
+     .style("font-size", "30px") 
      .style("fill", "black"); 
 
+     //Select X
      const selectXContainer = main.append("div")
-     .attr("class", "dropdown-container");
+                                    .attr("class", "dropdown-container");
 
     selectXContainer.append("label")
-     .attr("for", "plot-selectX")
-     .text("Choose feature X");
+                    .attr("for", "plot-selectX")
+                    .text("Choose feature X");
 
     const plotselectX = selectXContainer.append("select")
                             .attr("name", "plot-selectX")
@@ -237,12 +228,13 @@ function createTable(container, data) {
     let elem_select_X = document.getElementById('plot-selectX');
     M.FormSelect.init(elem_select_X, '');
 
+    //Select Y
     const selectYContainer = main.append("div")
-    .attr("class", "dropdown-container");
+                                .attr("class", "dropdown-container");
 
-   selectYContainer.append("label")
-    .attr("for", "plot-selectX")
-    .text("Choose feature Y");
+    selectYContainer.append("label")
+                    .attr("for", "plot-selectX")
+                    .text("Choose feature Y");
 
     const plotselectY = selectYContainer.append("select")
                             .attr("name", "plot-selectY")
@@ -267,15 +259,15 @@ function createTable(container, data) {
     let elem_select_Y = document.getElementById('plot-selectY');
     M.FormSelect.init(elem_select_Y, '');
 
+    //Plot Container
     const scatterPlotContainer = main.append("foreignObject")
          .attr("width", top.SVG_W)
          .attr("height", top.SVG_H/2)
-         .attr("transform", "translate(0, 0)") // Adjust the position as needed
          .append("xhtml:div")
          .attr("id", "scatterPlotContainer");
 
 
-     // Обработчик события для изменения осей графика
+     // Events
      [plotselectX, plotselectY].forEach(select => {
          select.on("change", function () {
              scatterPlotContainer.html("");
@@ -288,17 +280,20 @@ function createTable(container, data) {
  }
 
  function createScatterPlot(container, data, xOption, yOption) {
+    //SVG for Plot
      const scatterPlot = d3.create('svg')
          .attr('width', top.SVG_W)
          .attr('height', top.SVG_H/2 + 50)
          .style("opacity", 1)
          .attr('transform', 'translate(50, 50)');
 
+    //Data
      const xColumn = top.topfeatures[xOption];
      const yColumn = top.topfeatures[yOption];
 
      let filteredData = data.filter(d => d[xColumn] !== '' && d[yColumn] !== '');
 
+     //Scales
      const xScale = d3.scaleLinear()
          .domain([0, d3.max(data, d => d[xColumn])])
          .range([0, top.SVG_W]);
@@ -309,37 +304,37 @@ function createTable(container, data) {
 
      const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
+     //Legend
      const legend = scatterPlot.append("g")
                                 .attr("class", "legend")
                                 .attr("transform", `translate(${top.SVG_W - 150}, 10)`);
 
-     // Ось X
+     // Axe X
      scatterPlot.append("g")
          .attr("transform", `translate(50, ${top.SVG_H/2})`)
          .call(d3.axisBottom(xScale))
          .append("text")
-         .attr("x", 250) // Расположение подписи оси X по центру
-         .attr("y", 30)  // Расположение подписи ниже оси X
+         .attr("x", 250) 
+         .attr("y", 30) 
          .style("text-anchor", "middle")
          .text(xOption);
 
-     // Ось Y
-     scatterPlot.append("g")
-         .attr("transform", "translate(50, 0)")
-         .call(d3.axisLeft(yScale))
-         .append("text")
-         .attr("x", 30)  // Расположение подписи оси Y по центру
-         .attr("y", 30)   // Расположение подписи слева от оси Y
-         .style("text-anchor", "middle")
-         .text(yOption);
- 
-     // Добавление подписей осей
      scatterPlot.append("text")
          .attr("x", top.SVG_W / 2)
          .attr("y", top.SVG_H / 2 + 40)
          .style("text-anchor", "middle")
          .style("font-weight", "bold")
          .text(xOption + ", USD");
+
+     // Axe Y
+     scatterPlot.append("g")
+         .attr("transform", "translate(50, 0)")
+         .call(d3.axisLeft(yScale))
+         .append("text")
+         .attr("x", 30)  
+         .attr("y", 30)   
+         .style("text-anchor", "middle")
+         .text(yOption);
  
      scatterPlot.append("text")
          .attr("x", -top.SVG_H/4)
@@ -349,9 +344,6 @@ function createTable(container, data) {
          .style("font-weight", "bold")
          .text(yOption+", USD");
 
-     const tooltip = d3.select("body").append("div")
-         .attr("class", "tooltip")
-         .style("opacity", 0);
 
      scatterPlot.selectAll('circle')
          .data(filteredData)
@@ -363,18 +355,20 @@ function createTable(container, data) {
          .attr('fill', d => colorScale(d.country))
          .style("opacity", 0.7)
          .on("mouseover", function (event, d) {
-             // Показать всплывающую подсказку при наведении мыши
+             //City label
              scatterPlot.append("text")
-            .attr("class", "tooltip-label")
-            .attr("x", xScale(d[xColumn]) + 55) // Adjust the x-coordinate of the tooltip label
-            .attr("y", yScale(d[yColumn]) - 5)  // Adjust the y-coordinate of the tooltip label
-            .text(d.city+", "+d.country);
+                        .attr("class", "tooltip-label")
+                        .attr("x", xScale(d[xColumn]) + 55) 
+                        .attr("y", yScale(d[yColumn]) - 5)  
+                        .text(d.city);
 
+            //Changing Size
             const currentColor = colorScale(d.country);
             scatterPlot.selectAll('circle')
                         .filter(circle => colorScale(circle.country) === currentColor)
                         .attr('r', 5);
- 
+            
+            //Legend addition
             legend.append("rect")
                         .attr("width", 12)
                         .attr("height", 12)
@@ -388,9 +382,7 @@ function createTable(container, data) {
                         .attr("fill", currentColor);
          })
          .on("mouseout", function (d) {
-             // Скрыть всплывающую подсказку при уходе мыши
              scatterPlot.select(".tooltip-label").remove();
-             //legend.attr("visibility", "hidden");
              scatterPlot.selectAll('circle')
                         .attr('r', 3);
             legend.selectAll("rect").remove();
@@ -404,7 +396,7 @@ function createTable(container, data) {
 
 export function CreateInfo(data){
     const width = document.getElementById('bar-charts').offsetWidth;
-    const height = 1000;//document.getElementById('bar-charts').offsetHeight;
+    const height = 1000;
 
     top.SVG_W = width;
     top.SVG_H = height;
