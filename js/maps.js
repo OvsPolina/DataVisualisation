@@ -90,7 +90,6 @@ export function CreateMap(geo, cities, dataset){
             // selectedCountry, geo, world_cities, dataset
             updateCountryMap(d, geo, cities, dataset);
             selectedCountryInfo(d);
-
       });
 
     //   Buttons
