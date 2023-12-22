@@ -12,6 +12,8 @@
     display: flex;
     flex-direction: column;
     align-content: space-around;
+    padding-left: 20px; 
+    padding-right: 20px;
 }
 .wrapper > * {
     flex: 1 100%;
