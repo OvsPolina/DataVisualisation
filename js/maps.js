@@ -89,6 +89,8 @@ export function CreateMap(geo, cities, dataset){
             .style("fill", "green"); 
             // selectedCountry, geo, world_cities, dataset
             updateCountryMap(d, geo, cities, dataset);
+            selectedCountryInfo(d);
+
       });
 
     //   Buttons
@@ -254,6 +256,12 @@ export function CreateMap(geo, cities, dataset){
 
 
 
+
+
+
+
+
+
 export function CreateCountryMap(geo, world_cities, dataset){
 
     const width = document.getElementById('global-map').offsetWidth;
@@ -380,8 +388,27 @@ export function CreateCountryMap(geo, world_cities, dataset){
                                     d3.select("#country-map-group").transition().call(zoom.scaleBy, 0.8);
                                     d3.select("#city-map-group").transition().call(zoom.scaleBy, 0.8);
                                 });
-    // Info
-    let selectedCountry = 'France';
+};
+
+
+
+
+
+// Selected Country INFO 
+
+
+
+
+export function selectedCountryInfo(selected_country){
+    const width = document.getElementById('global-map').offsetWidth;
+    const height = document.getElementById('global-map').offsetHeight;
+    let selectedCountry;
+    if (typeof selected_country === 'string'){
+        selectedCountry = selected_country;
+    } else {
+        selectedCountry = selected_country.properties.name;
+    }
+    let country_vis = d3.select("#selected-country-map");
     country_vis.append("text")
         .attr("x", width /2) 
         .attr("y", 20)  
@@ -578,6 +605,14 @@ function draw_country_city_maps(geo_features, world_cities_features,
     //         .style("stroke", "white")
     //         .style("stroke-width", "0.25");
 };
+
+
+
+
+
+
+
+
 
 
 function updateCountryMap(selectedCountry, _geo, _world_cities, _dataset) {
