@@ -3,7 +3,6 @@ import { process_country_info, feature_code_to_value,
 
 
 export function CreateMap(geo, cities, dataset){
-
     // Set up the map dimensions
     const width = document.getElementById('global-map').offsetWidth;
     const height = document.getElementById('global-map').offsetHeight;
@@ -88,7 +87,8 @@ export function CreateMap(geo, cities, dataset){
       .on("click", function (event, d) {
         d3.select(this)
             .style("fill", "green"); 
-        updateCountryMap(d, cities);
+            // selectedCountry, geo, world_cities, dataset
+            updateCountryMap(d, geo, cities, dataset);
       });
 
     //   Buttons
@@ -292,8 +292,7 @@ export function CreateCountryMap(geo, world_cities, dataset){
 
         // Filter cities here to keep initial scale
     world_cities.features = filterCities('France', dataset, world_cities.features);
-
-    svg.append("g").attr("id", "coutry-map-group")
+    d3.select("#country-map").append("g").attr("id", "coutry-map-group")
             .selectAll("path")
             .data(geo.features)
             .enter()
@@ -302,7 +301,7 @@ export function CreateCountryMap(geo, world_cities, dataset){
             .style("fill", "darkcyan") 
             .style("stroke", "none");
 
-    svg.append("g").attr("id", "city-map-group")
+    d3.select("#country-map").append("g").attr("id", "city-map-group")
             .selectAll("path")
             .data(world_cities.features)
             .enter()
@@ -312,6 +311,8 @@ export function CreateCountryMap(geo, world_cities, dataset){
             .attr("fill", "blueviolet")
             .style("stroke", "white")
             .style("stroke-width", "0.25");
+    // draw_country_city_maps(geo.features, world_cities.features,
+    //     pathGenerator, cityPathGenerator);
     
     const zoom = d3.zoom()
     .scaleExtent([1, 2]) 
@@ -344,7 +345,7 @@ export function CreateCountryMap(geo, world_cities, dataset){
         d3.select("#city-name")
           .style("display", "none");    
             
-      })
+      });
 
 
     //   Buttons
@@ -382,54 +383,123 @@ export function CreateCountryMap(geo, world_cities, dataset){
 };
 
 
-// function updateCountryMap(selectedCountry, cities) {
-//     console.log(selectedCountry);
-//     const selectedCountryId = selectedCountry.properties.name;
+function draw_country_city_maps(geo_features, world_cities_features,
+    pathGenerator, cityPathGenerator){
 
-//     console.log(selectedCountry.properties.name);
+    d3.select("#country-map-group")
+        .selectAll("path")
+        .data(geo_features)
+        .join(
+            enter => (
+                enter.append("path")
+                .attr("d", pathGenerator)
+                .style("fill", "darkcyan") 
+                .style("stroke", "none")
+            ),
+            update => (
+                update.call(
+                    update => {
+                        
+                    }
+                )
+            ),
+            exit => (
+                exit.remove()
+            )
+        );
 
-//     // Assuming your city data is named 'cityData' and is in GeoJSON format
-//     const filteredCities = cities.features.filter(city => city.properties.cou_name_en === selectedCountry.properties.name);
-//     console.log(filteredCities);
-//     // Customize the display of filteredCities as needed
-//     const countryMapElement = d3.select("#country-map");
-//     countryMapElement.html("");
-//     countryMapElement.append("h2").text(selectedCountry.properties.name);
-//     console.log(countryMapElement.node());
 
-//     // Remove existing city markers
-//     countryMapElement.select("#city-markers").remove();
 
-//     // Create a new group for city markers
-//     const cityMarkers = countryMapElement.append("g").attr("id", "city-markers");
+    // d3.select("#country-map").append("g").attr("id", "coutry-map-group")
+    //         .selectAll("path")
+    //         .data(geo_features)
+    //         .enter()
+    //         .append("path")
+    //         .attr("d", pathGenerator)
+    //         .style("fill", "darkcyan") 
+    //         .style("stroke", "none");
 
-//     // Create a projection for the map
-//     const projection = d3.geoIdentity().reflectY(true).fitSize([ctx.SVG_W / 2, ctx.SVG_H / 2], selectedCountry);
-//     const pathGenerator = d3.geoPath().projection(projection);
+    // d3.select("#country-map").append("g").attr("id", "city-map-group")
+    //         .selectAll("path")
+    //         .data(world_cities_features)
+    //         .enter()
+    //         .append("path")
+    //         .attr("d", cityPathGenerator)
+    //         .attr("name", (d) => d.properties.name)
+    //         .attr("fill", "blueviolet")
+    //         .style("stroke", "white")
+    //         .style("stroke-width", "0.25");
+};
 
-//     // Draw the map for the selected country
-//     /*const cmapGroup = countryMapElement.append("g")
-//         .attr("transform", "translate(0, 0)")
-//         .attr("width", ctx.SVG_W / 2)
-//         .attr("height", ctx.SVG_H / 2);*/
 
-//     const cmapGroup = cityMarkers.selectAll("path")
-//         .data(filteredCities)  // Pass only the selected country to the data
-//         .enter()
-//         .append("path")
-//         .attr("d", pathGenerator)
-//         .style("fill", "red") // Set a fill color
-//         .style("background", 'black')
-//         .style("stroke", "white");
+function updateCountryMap(selectedCountry, _geo, _world_cities, _dataset) {
+    Promise.all([
+        d3.json("data/custom.geo.json"),
+        d3.csv("data/cost-of-living.csv"),
+        d3.json("data/world.geojson")
+      ])
+        .then(function(data) {
+            let geo = data[0];
+            let dataset = data[1];
+            let world_cities = data[2];
 
-//     // Bind the GeoJSON data to the path elements and draw them
-//     /*cmapGroup.selectAll("path")
-//         .data(filteredCities.properties)  // Передаем только выбранную страну в данные
-//         .enter()
-//         .append("path")
-//         .attr("d", pathGenerator)
-//         .style("fill", "orange") // Set a fill color
-//         .style("background", 'black')
-//         .style("stroke", "white");*/
+            console.log('data in update loaded');
 
-// }
+            const selectedCountryName = selectedCountry.properties.name;
+
+            const width = document.getElementById('global-map').offsetWidth;
+            const height = document.getElementById('global-map').offsetHeight;
+            console.log(geo);
+            geo.features = geo.features.filter(d => d.properties.name === selectedCountryName);
+            console.log(geo);
+            world_cities.features = world_cities.features.filter(d => d.properties.cou_name_en === selectedCountryName);
+                
+            // let first_feat = geo.features[0].geometry;
+            // const maxIndex = first_feat.coordinates.reduce((maxIndex, currentArray, currentIndex, array) => {
+            //     return currentArray.length > array[maxIndex].length ? currentIndex : maxIndex;
+            // }, 0);
+            // console.log(first_feat);
+            // console.log(maxIndex);
+            // first_feat.coordinates = first_feat.coordinates.slice(maxIndex, maxIndex + 1);
+            
+
+
+            const country_projection = d3.geoIdentity()
+                                        .reflectY(true)
+                                        .fitSize([width/2, height-300], geo);
+            const pathGenerator = d3.geoPath().projection(country_projection);
+
+            const city_projection = d3.geoIdentity()
+                                        .reflectY(true)
+                                        .fitSize([width/2, height-300], world_cities);
+            const cityPathGenerator = d3.geoPath().projection(city_projection);
+
+                // Filter cities here to keep initial scale
+            world_cities.features = filterCities(selectedCountryName, dataset, world_cities.features);
+            let countryMapElement = d3.select("#country-map").html('');
+            countryMapElement.select("#country-map-group").remove();
+            countryMapElement.select("#city-map-group").remove();
+
+
+            countryMapElement.append("g").attr("id", "country-map-group")
+                    .selectAll("path")
+                    .data(geo.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", pathGenerator)
+                    .style("fill", "darkcyan") 
+                    .style("stroke", "none");
+
+            countryMapElement.append("g").attr("id", "city-map-group")
+                    .selectAll("path")
+                    .data(world_cities.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", cityPathGenerator)
+                    .attr("name", (d) => d.properties.name)
+                    .attr("fill", "blueviolet")
+                    .style("stroke", "white")
+                    .style("stroke-width", "0.25");
+        }).catch(function (error) { console.log(error) });
+
+};
