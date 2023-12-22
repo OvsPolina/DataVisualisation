@@ -15,7 +15,8 @@ const ctx = {
 };
 
 import { CreateMap } from "./maps.js";
-import { process_country_info} from "./data_process.js";
+import { CreateInfo} from "./barchart.js";
+
 
 function loadData() {
     Promise.all([
@@ -27,7 +28,7 @@ function loadData() {
             console.log('data loaded')
             CreateMap(data[0], data[2], data[1]);
             // CreateCountryMap(data[2]);
-            // CreateInfo(data[1]);
+            CreateInfo(data[1]);
 
             // d3.selectAll("global-map").call(zoom);
 
