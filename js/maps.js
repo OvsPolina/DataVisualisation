@@ -259,7 +259,7 @@ export function CreateCountryMap(geo, world_cities, dataset){
     const width = document.getElementById('global-map').offsetWidth;
     const height = document.getElementById('global-map').offsetHeight;
 
-    let country_vis = d3.select("#map-vis").append("div")
+    let country_vis = d3.select("#selected-country-map").append("div")
                   .attr("id", "country-vis")
                   .attr("width", width)
                   .attr("height", height - 100)
@@ -443,8 +443,6 @@ function updateCountryMap(selectedCountry, _geo, _world_cities, _dataset) {
             let geo = data[0];
             let dataset = data[1];
             let world_cities = data[2];
-
-            console.log('data in update loaded');
 
             const selectedCountryName = selectedCountry.properties.name;
 

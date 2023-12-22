@@ -65,6 +65,10 @@
     left: 85%;
 }
 
+#selected-country-map{
+    display: flex;
+}
+
 
 .bar-charts{
     order: 2;
