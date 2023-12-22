@@ -89,7 +89,10 @@ export function CreateMap(geo, cities, dataset){
             .style("fill", "green"); 
             // selectedCountry, geo, world_cities, dataset
             updateCountryMap(d, geo, cities, dataset);
+            d3.selectAll("#country-bar").remove();
             selectedCountryInfo(d);
+
+           // d3.selectAll("#country-bar").html("");
       });
 
     //   Buttons
@@ -405,6 +408,7 @@ export function selectedCountryInfo(selected_country){
     } else {
         selectedCountry = selected_country.properties.name;
     }
+    d3.selectAll("#selected-country-map").selectAll("text").html("");
     d3.select("#selected-country-map").append("text")
             .attr("x", width /2) 
             .attr("y", 20)  
@@ -425,12 +429,14 @@ export function selectedCountryInfo(selected_country){
             let dataset = data[1];
             let world_cities = data[2];
 
-            let country_vis = d3.select("#selected-country-map").append("div");
+            d3.selectAll("#country-div").remove();
+
+            let country_vis = d3.select("#selected-country-map");//.append("div");
             //Select Feature
             const selectContainer = country_vis.append("div")
+                                            .attr("name", "country-div")
+                                            .attr("id", "country-div")
                                             .attr("class", "dropdown-container")
-                                            //.style("display", "flex")
-                                            //.style("flex-direction", "column-reverse")
                                             .style("margin-top", "50px");
 
             selectContainer.append("label")
@@ -474,7 +480,7 @@ export function selectedCountryInfo(selected_country){
                                 .attr("id", "country-bar")
                                 .style("position", "relative")
                                 //.style("flex-direction", "column-reverse")
-                                .style("margin-top", "100px");;
+                                .style("margin-top", "100px");
 
             const barChartContainer = bar
             .append("foreignObject")
@@ -507,7 +513,7 @@ export function selectedCountryInfo(selected_country){
                 const filteredCities = dataset.filter(city => city.country === selectedCountry);
 
                 const sortedData = filteredCities.sort((a, b) => b['x'+selected_value] - a['x'+selected_value]).slice(0,10);
-
+                console.log(sortedData);
                 //Scales for the barchart
                 const xScale = d3.scaleBand()
                     .domain(sortedData.map(d => d.city))
