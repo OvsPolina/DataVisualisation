@@ -272,8 +272,8 @@ export function CreateCountryMap(geo, world_cities, dataset){
                   .attr("width", width)
                   .attr("height", height - 100)
                   .style("display", "flex")
-                  .style("flex-direction", "column-reverse")
-                  .style("margin-top", "50px");
+                  .style("flex-direction", "column-reverse");
+                //   .style("margin-top", "50px");
 
     geo.features = geo.features.filter(d => d.properties.name == "France");
     world_cities.features = world_cities.features.filter(d => d.properties.cou_name_en == "France");
@@ -397,8 +397,6 @@ export function CreateCountryMap(geo, world_cities, dataset){
 // Selected Country INFO 
 
 
-
-
 export function selectedCountryInfo(selected_country){
     const width = document.getElementById('global-map').offsetWidth;
     const height = document.getElementById('global-map').offsetHeight;
@@ -408,152 +406,167 @@ export function selectedCountryInfo(selected_country){
     } else {
         selectedCountry = selected_country.properties.name;
     }
-    let country_vis = d3.select("#selected-country-map");
-    country_vis.append("text")
-        .attr("x", width /2) 
-        .attr("y", 20)  
-        .text(selectedCountry)
-        .style("font-size", "30px")  
-        .style("fill", "black"); 
-    //Select Feature
-    const selectContainer = country_vis.append("div")
-                                    .attr("class", "dropdown-container")
-                                    //.style("display", "flex")
-                                    //.style("flex-direction", "column-reverse")
-                                    .style("margin-top", "50px");
+    d3.select("#selected-country-map").append("text")
+            .attr("x", width /2) 
+            .attr("y", 20)  
+            .text(selectedCountry)
+            .style("font-size", "30px")  
+            .style("fill", "black")
+            .style("position", "absolute")
+            .style("top", "700px")
+            .style("left", '40%'); 
 
-    selectContainer.append("label")
-                    .attr("for", "country-select")
-                    .text("Choose top feature");
-    
-    const countryselect = selectContainer.append("select")
-                            .attr("name", "country-select")
-                            .attr("id", "country-select");
+    Promise.all([
+        d3.json("data/custom.geo.json"),
+        d3.csv("data/cost-of-living.csv"),
+        d3.json("data/world.geojson")
+        ])
+        .then(function(data) {
+            let geo = data[0];
+            let dataset = data[1];
+            let world_cities = data[2];
 
-    countryselect.append("option")
-            .attr('value', '')
-            .attr('disabled', true)
-            .attr('selected', true)
-            .text('Choose feature');
+            let country_vis = d3.select("#selected-country-map").append("div");
+            //Select Feature
+            const selectContainer = country_vis.append("div")
+                                            .attr("class", "dropdown-container")
+                                            //.style("display", "flex")
+                                            //.style("flex-direction", "column-reverse")
+                                            .style("margin-top", "50px");
 
-    let options = [{'value': -1, 'text':''}];
-    let feature_keys = Object.keys(feature_code_to_value);
-    for (let i = 0; i < feature_keys.length; i++) {
-        let opt = {
-          value: i,
-          text: feature_code_to_value[feature_keys[i]],
-        };
-        options.push(opt);
-      }
+            selectContainer.append("label")
+                            .attr("for", "country-select")
+                            .text("Choose top feature");
+            
+            const countryselect = selectContainer.append("select")
+                                    .attr("name", "country-select")
+                                    .attr("id", "country-select");
 
-    countryselect.selectAll('option')
-      .data(options)
-      .enter()
-      .append('option')
-      .attr('value', d => d.value)
-      .text(d => d.text); 
+            countryselect.append("option")
+                    .attr('value', '')
+                    .attr('disabled', true)
+                    .attr('selected', true)
+                    .text('Choose feature');
 
-    let elem_select = document.getElementById('country-select');
-    M.FormSelect.init(elem_select, '');
+            let options = [{'value': -1, 'text':''}];
+            let feature_keys = Object.keys(feature_code_to_value);
+            for (let i = 0; i < feature_keys.length; i++) {
+                let opt = {
+                value: i,
+                text: feature_code_to_value[feature_keys[i]],
+                };
+                options.push(opt);
+            }
 
-    //Barchart Container
-    let bar = country_vis.append("div")
-                        .style("display", "flex")
-                        .attr("name", "country-bar")
-                        .attr("id", "country-bar")
-                        .style("position", "relative")
-                        //.style("flex-direction", "column-reverse")
-                        .style("margin-top", "100px");;
-
-    const barChartContainer = bar
-    .append("foreignObject")
-    .attr("width", width / 2)
-    .attr("height", height)
-    .append("xhtml:div")
-    .style("display", "block")
-    .attr("id", "CountryBarChartContainer");
-
-    const barChartContainerSelection = d3.select(barChartContainer);
-
-    // Events
-    countryselect.on("change", function () {
-        
-        barChartContainer.html("");
-        //createCountryBarChart(barChartContainer.node(), data, selectedOption, selectedCountry);
-
-        const barChart = d3.create('svg')
-                            .attr('width',width / 2 )
-                            .attr('height', height/2)
-                            .style("opacity", 1);
-
-        let selected_value = parseInt(d3.select(this).property("value"));
-        let selected_feature = options[selected_value + 1].text;
-
-
-        const chartGroup = barChart.append("g").attr('width', width/2).attr('height', height/2)
-                                    .attr('transform', 'translate(50, 50)');
-
-        const filteredCities = dataset.filter(city => city.country === selectedCountry);
-
-        const sortedData = filteredCities.sort((a, b) => b['x'+selected_value] - a['x'+selected_value]).slice(0,10);
-
-        //Scales for the barchart
-        const xScale = d3.scaleBand()
-            .domain(sortedData.map(d => d.city))
-            .range([0, width/2 - 100])
-            .padding(0.1);
-
-        console.log(sortedData[0]['x'+selected_value]);
-
-        const yScale = d3.scaleLinear()
-            .domain([0, sortedData[0]['x'+selected_value]])
-            .range([(height / 2 - 100), 0]);
-
-        //Barcharts
-        chartGroup.selectAll('rect')
-            .data(sortedData)
-            .enter().append('rect')
-            .attr('x', d => xScale(d['city']))
-            .attr('y', d => yScale(d['x'+selected_value]))
-            .attr('width', xScale.bandwidth())
-            .attr('height', d => (height / 2 - 100) - yScale(d['x'+selected_value]))
-            .attr('fill', 'lightblue')
-            .style("opacity", 1);
-
-        //Labels
-        chartGroup.selectAll('text.bar-label')
-            .data(sortedData)
+            countryselect.selectAll('option')
+            .data(options)
             .enter()
-            .append('text')
-            .attr('class', 'bar-label')
-            .text(d => d['x'+selected_value]) 
-            .attr('x', d => xScale(d['city']) + xScale.bandwidth()/2)
-            .attr('y', d => yScale(d['x'+selected_value]) - 5) 
-            .attr('text-anchor', 'middle'); 
+            .append('option')
+            .attr('value', d => d.value)
+            .text(d => d.text); 
 
-        //Y label
-        chartGroup.append("g")
-            .call(d3.axisLeft(yScale))
-            .selectAll("text")
-            .attr("x", -15) 
-            .attr("y", -15)  
-            .attr("dy", "1em")
-            .style("text-anchor", "middle") 
-            .attr("transform", "rotate(-45)"); 
+            let elem_select = document.getElementById('country-select');
+            M.FormSelect.init(elem_select, '');
 
-        // City labels below each bar
-        chartGroup.selectAll('text.city-label')
-            .data(sortedData)
-            .enter()
-            .append('text')
-            .attr('class', 'city-label')
-            .text(d => d.city)
-            .attr('x', d => xScale(d.city) + xScale.bandwidth() / 2)
-            .attr('y', (height / 2 - 75))
-            .attr('text-anchor', 'middle')
-            .attr('transform', (d) => `rotate(-15 ${xScale(d.city) + xScale.bandwidth() / 2},${(height / 2 - 75)})`);
+            //Barchart Container
+            let bar = country_vis.append("div")
+                                .style("display", "flex")
+                                .attr("name", "country-bar")
+                                .attr("id", "country-bar")
+                                .style("position", "relative")
+                                //.style("flex-direction", "column-reverse")
+                                .style("margin-top", "100px");;
 
-            barChartContainer.append(() => barChart.node());
+            const barChartContainer = bar
+            .append("foreignObject")
+            .attr("width", width / 2)
+            .attr("height", height)
+            .append("xhtml:div")
+            .style("display", "block")
+            .attr("id", "CountryBarChartContainer");
+
+            const barChartContainerSelection = d3.select(barChartContainer);
+
+            // Events
+            countryselect.on("change", function () {
+                
+                barChartContainer.html("");
+                //createCountryBarChart(barChartContainer.node(), data, selectedOption, selectedCountry);
+
+                const barChart = d3.create('svg')
+                                    .attr('width',width / 2 )
+                                    .attr('height', height/2)
+                                    .style("opacity", 1);
+
+                let selected_value = parseInt(d3.select(this).property("value"));
+                let selected_feature = options[selected_value + 1].text;
+
+
+                const chartGroup = barChart.append("g").attr('width', width/2).attr('height', height/2)
+                                            .attr('transform', 'translate(50, 50)');
+
+                const filteredCities = dataset.filter(city => city.country === selectedCountry);
+
+                const sortedData = filteredCities.sort((a, b) => b['x'+selected_value] - a['x'+selected_value]).slice(0,10);
+
+                //Scales for the barchart
+                const xScale = d3.scaleBand()
+                    .domain(sortedData.map(d => d.city))
+                    .range([0, width/2 - 100])
+                    .padding(0.1);
+
+                console.log(sortedData[0]['x'+selected_value]);
+
+                const yScale = d3.scaleLinear()
+                    .domain([0, sortedData[0]['x'+selected_value]])
+                    .range([(height / 2 - 100), 0]);
+
+                //Barcharts
+                chartGroup.selectAll('rect')
+                    .data(sortedData)
+                    .enter().append('rect')
+                    .attr('x', d => xScale(d['city']))
+                    .attr('y', d => yScale(d['x'+selected_value]))
+                    .attr('width', xScale.bandwidth())
+                    .attr('height', d => (height / 2 - 100) - yScale(d['x'+selected_value]))
+                    .attr('fill', 'lightblue')
+                    .style("opacity", 1);
+
+                //Labels
+                chartGroup.selectAll('text.bar-label')
+                    .data(sortedData)
+                    .enter()
+                    .append('text')
+                    .attr('class', 'bar-label')
+                    .text(d => d['x'+selected_value]) 
+                    .attr('x', d => xScale(d['city']) + xScale.bandwidth()/2)
+                    .attr('y', d => yScale(d['x'+selected_value]) - 5) 
+                    .attr('text-anchor', 'middle'); 
+
+                //Y label
+                chartGroup.append("g")
+                    .call(d3.axisLeft(yScale))
+                    .selectAll("text")
+                    .attr("x", -15) 
+                    .attr("y", -15)  
+                    .attr("dy", "1em")
+                    .style("text-anchor", "middle") 
+                    .attr("transform", "rotate(-45)"); 
+
+                // City labels below each bar
+                chartGroup.selectAll('text.city-label')
+                    .data(sortedData)
+                    .enter()
+                    .append('text')
+                    .attr('class', 'city-label')
+                    .text(d => d.city)
+                    .attr('x', d => xScale(d.city) + xScale.bandwidth() / 2)
+                    .attr('y', (height / 2 - 75))
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', (d) => `rotate(-15 ${xScale(d.city) + xScale.bandwidth() / 2},${(height / 2 - 75)})`);
+
+                    barChartContainer.append(() => barChart.node());
+            });
     });
 };
 
