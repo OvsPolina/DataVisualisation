@@ -319,7 +319,7 @@ export function CreateCountryMap(geo, world_cities, dataset){
     .on("zoom", zoomed);
 
     function zoomed(event) {
-        d3.select("#coutry-map-group").attr("transform", event.transform);
+        d3.select("#country-map-group").attr("transform", event.transform);
         d3.select("#city-map-group").attr("transform", event.transform);
     }
 
@@ -328,7 +328,8 @@ export function CreateCountryMap(geo, world_cities, dataset){
 
     country_vis.append("p").attr("id", "city-name")
                             .style("display", "none")
-                            .style("position", "absolute");
+                            .style("position", "absolute")
+                            .style("translate", "150px 0px");
     let city_color;
     d3.select("#city-map-group").selectAll("path")
       .on("mouseover", function (event, d) {
@@ -367,7 +368,7 @@ export function CreateCountryMap(geo, world_cities, dataset){
                                 .text("+")
                                 .attr("transform", "translate(0,0)")
                                 .on("click", function() {
-                                    d3.select("#coutry-map-group").transition().call(zoom.scaleBy, 1.2);
+                                    d3.select("#country-map-group").transition().call(zoom.scaleBy, 1.2);
                                     d3.select("#city-map-group").transition().call(zoom.scaleBy, 1.2);
                                 });
 
@@ -376,7 +377,7 @@ export function CreateCountryMap(geo, world_cities, dataset){
                                 .text("-")
                                 .attr("transform", "translate(0,0)")
                                 .on("click", function() {
-                                    d3.select("#coutry-map-group").transition().call(zoom.scaleBy, 0.8);
+                                    d3.select("#country-map-group").transition().call(zoom.scaleBy, 0.8);
                                     d3.select("#city-map-group").transition().call(zoom.scaleBy, 0.8);
                                 });
 
@@ -454,13 +455,24 @@ function updateCountryMap(selectedCountry, _geo, _world_cities, _dataset) {
             console.log(geo);
             world_cities.features = world_cities.features.filter(d => d.properties.cou_name_en === selectedCountryName);
                 
+            //Filter geojson to get rid of small or distant country parts
+
             // let first_feat = geo.features[0].geometry;
             // const maxIndex = first_feat.coordinates.reduce((maxIndex, currentArray, currentIndex, array) => {
             //     return currentArray.length > array[maxIndex].length ? currentIndex : maxIndex;
             // }, 0);
-            // console.log(first_feat);
+            // const minIndex = first_feat.coordinates.reduce((minIndex, currentArray, currentIndex, array) => {
+            //     if (currentArray.length < array[minIndex].length) {
+            //       return currentIndex;
+            //     } else {
+            //       return minIndex;
+            //     }
+            //   }, 0);
+            
+            // console.log(first_feat.coordinates);
             // console.log(maxIndex);
-            // first_feat.coordinates = first_feat.coordinates.slice(maxIndex, maxIndex + 1);
+            // console.log(minIndex);
+            // first_feat.coordinates = first_feat.coordinates.slice(maxIndex, minIndex);
             
 
 
@@ -500,6 +512,25 @@ function updateCountryMap(selectedCountry, _geo, _world_cities, _dataset) {
                     .attr("fill", "blueviolet")
                     .style("stroke", "white")
                     .style("stroke-width", "0.25");
+
+
+                    let city_color;
+                    d3.select("#city-map-group").selectAll("path")
+                    .on("mouseover", function (event, d) {
+                    city_color = d3.color(d3.select(this).style("fill"));
+                    d3.select(this).style("fill", 'orange');
+
+                    d3.select("#city-name")
+                        .style("display", "block")
+                        .text(`${d3.select(this).attr("name")}`);
+                    })    
+                    .on("mouseout", function (event, d) {
+                    d3.select(this)
+                    .style("fill", city_color.toString());
+                    d3.select("#city-name")
+                    .style("display", "none");    
+                        
+                    });
         }).catch(function (error) { console.log(error) });
 
 };
