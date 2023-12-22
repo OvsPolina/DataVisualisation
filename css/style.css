@@ -68,6 +68,7 @@
 
 .bar-charts{
     order: 2;
+    margin: 10px 10px;
 }
 .ml-analysis{
     order: 3;

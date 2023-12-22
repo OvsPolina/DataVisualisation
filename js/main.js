@@ -14,7 +14,7 @@ const ctx = {
                 "Gasoline": 'x33'},
 };
 
-import { CreateMap } from "./maps.js";
+import { CreateMap, CreateCountryMap } from "./maps.js";
 import { CreateInfo} from "./barchart.js";
 
 
@@ -27,10 +27,8 @@ function loadData() {
         .then(function(data) {
             console.log('data loaded')
             CreateMap(data[0], data[2], data[1]);
-            // CreateCountryMap(data[2]);
+            CreateCountryMap(data[0],data[2], data[1]);
             CreateInfo(data[1]);
-
-            // d3.selectAll("global-map").call(zoom);
 
         }).catch(function (error) { console.log(error) });
 };

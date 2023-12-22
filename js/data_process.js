@@ -142,3 +142,12 @@ export function geo_to_dataset_country_names(geo_set, dataset){
     geo_to_dataset['Vatican'] = 'Vatican City';
     return geo_to_dataset;
 };
+
+
+export function filterCities(country, dataset, geo_cities_features){
+    let dataset_country = dataset.filter(c => c.country === country);
+
+    let dataset_cities = dataset_country.map(c => c.city);
+
+    return geo_cities_features.filter(d => dataset_cities.includes(d.properties.name));
+};

@@ -1,4 +1,5 @@
-import { process_country_info, feature_code_to_value, geo_to_dataset_country_names} from "./data_process.js";
+import { process_country_info, feature_code_to_value, 
+    geo_to_dataset_country_names, filterCities} from "./data_process.js";
 
 
 export function CreateMap(geo, cities, dataset){
@@ -46,6 +47,10 @@ export function CreateMap(geo, cities, dataset){
 
     mapGroup.call(zoom);
     mapGroup.on("wheel.zoom", null); 
+
+    // 
+    // MouseOver MouseOut Click 
+    // 
 
     let country_color = 'darkcyan';
     mapGroup.selectAll("path")
@@ -243,88 +248,143 @@ export function CreateMap(geo, cities, dataset){
             exit => (
                 exit.remove()
             )
-        );         
-
-
-
-        // if (bar.node().childElementCount > 0){
-        //     bar.selectAll("rect")
-        //     .data(legendValues)
-        //     .enter()
-        //     .attr("fill", d => scaler(log_scaler(d)));
-
-        //     d3.select("#bar-svg").selectAll("text")
-        //     .data(legendValues)
-        //     .enter()
-        //     .text(d => d);
-        // } else {
-        //     bar.style("display", "block");
-        //     bar.selectAll("rect")
-        //     .data(legendValues)
-        //     .enter()
-        //     .append("rect")
-        //     .attr("x", 20)
-        //     .attr("y", (d, i) => i * 10)
-        //     .attr("width", 50)
-        //     .attr("height", 10)
-        //     .attr("fill", d => scaler(log_scaler(d)));
-
-            // d3.select("#bar-svg").selectAll("text")
-            // .data(legendValues)
-            // .enter()
-            // .append("text")
-            // .attr("x", 45)
-            // .attr("y", (d, i) => i * 5 + 2)
-            // .attr("text-anchor", "middle")
-            // .text(d => d);
-        // }
-        
-        
-        
+        );                 
     }); 
 };
 
 
 
-// function CreateCountryMap(map){
-//     let main = d3.select("#country").style("display", "inline-block");
+export function CreateCountryMap(geo, world_cities, dataset){
 
-//     let CountryMap = main.append("svg").attr("id", "country-map").attr("width", ctx.SVG_W/2).attr("height", ctx.SVG_H/2);
+    const width = document.getElementById('global-map').offsetWidth;
+    const height = document.getElementById('global-map').offsetHeight;
 
-//     const projection = d3.geoIdentity().reflectY(true).fitSize([ctx.SVG_W/2, ctx.SVG_H/2], map);
-//     const pathGenerator = d3.geoPath().projection(projection);
+    let country_vis = d3.select("#map-vis").append("div")
+                  .attr("id", "country-vis")
+                  .attr("width", width)
+                  .attr("height", height - 100)
+                  .style("display", "flex")
+                  .style("flex-direction", "column-reverse")
+                  .style("margin-top", "50px");
+
+    geo.features = geo.features.filter(d => d.properties.name == "France");
+    world_cities.features = world_cities.features.filter(d => d.properties.cou_name_en == "France");
+        
+    let first_feat = geo.features[0].geometry;
+    first_feat.coordinates = first_feat.coordinates.slice(0, 3);
+
+
+    const country_projection = d3.geoIdentity()
+                                .reflectY(true)
+                                .fitSize([width/2, height-300], geo);
+    const pathGenerator = d3.geoPath().projection(country_projection);
+
+    const city_projection = d3.geoIdentity()
+                                .reflectY(true)
+                                .fitSize([width/2, height-300], world_cities);
+    const cityPathGenerator = d3.geoPath().projection(city_projection);
+
+
+    let svg = d3.select("#country-vis").append("svg")
+            .attr("id", "country-map")
+            .attr("width", width/2)
+            .attr("height", height - 300);
+
+        // Filter cities here to keep initial scale
+    world_cities.features = filterCities('France', dataset, world_cities.features);
+
+    svg.append("g").attr("id", "coutry-map-group")
+            .selectAll("path")
+            .data(geo.features)
+            .enter()
+            .append("path")
+            .attr("d", pathGenerator)
+            .style("fill", "darkcyan") 
+            .style("stroke", "none");
+
+    svg.append("g").attr("id", "city-map-group")
+            .selectAll("path")
+            .data(world_cities.features)
+            .enter()
+            .append("path")
+            .attr("d", cityPathGenerator)
+            .attr("name", (d) => d.properties.name)
+            .attr("fill", "blueviolet")
+            .style("stroke", "white")
+            .style("stroke-width", "0.25");
     
-//     // Create a group for the map features
-//     const cmapGroup = CountryMap.append("g")
-//                         .attr("transform", "translate(0, 0)")
-//                         .attr("id", "city-markers")
-//                         .attr("width", ctx.SVG_W/2)
-//                         .attr("height", ctx.SVG_H/2);
+    const zoom = d3.zoom()
+    .scaleExtent([1, 2]) 
+    .on("zoom", zoomed);
 
-//     // Bind the GeoJSON data to the path elements and draw them
-//     cmapGroup.selectAll("path")
-//       .data(map.features)
-//       .enter()
-//       .append("path")
-//       .attr("d", pathGenerator)
-//       .style("fill", "red") // Set a fill color
-//       .style("background", 'black')
-//       .style("stroke", "white");
+    function zoomed(event) {
+        d3.select("#coutry-map-group").attr("transform", event.transform);
+        d3.select("#city-map-group").attr("transform", event.transform);
+    }
 
-//     cmapGroup.selectAll("path")
-//       .on("mouseover", function (event, d) {
-//           d3.select(this)
-//               .style("fill", "orange"); // Измените цвет подсветки по своему выбору
-//       })
-//       .on("mouseout", function (event, d) {
-//           d3.select(this)
-//               .style("fill", "lightblue"); // Возвращение оригинального цвета
-//       });
-// }
+
+    // Hover 
+
+    country_vis.append("p").attr("id", "city-name")
+                            .style("display", "none")
+                            .style("position", "absolute");
+    let city_color;
+    d3.select("#city-map-group").selectAll("path")
+      .on("mouseover", function (event, d) {
+        city_color = d3.color(d3.select(this).style("fill"));
+        d3.select(this).style("fill", 'orange');
+        
+        d3.select("#city-name")
+            .style("display", "block")
+            .text(`${d3.select(this).attr("name")}`);
+      })    
+      .on("mouseout", function (event, d) {
+        d3.select(this)
+          .style("fill", city_color.toString());
+        d3.select("#city-name")
+          .style("display", "none");    
+            
+      })
+
+
+    //   Buttons
+
+    country_vis.append('div')
+                .attr("id", "country-map-bttns")
+                .style("display", "flex")
+                .style("justify-content", 'space-between')
+                .style("padding-left", `${width / 8}px`)
+                .style("padding-right", "100px");
+
+    d3.select("#country-map-bttns").append('div')
+                    .attr("id", "zoom-country-bttns")
+                    .style("display", "flex")
+                    .style("flex-direction", "column");
+
+    d3.select("#zoom-country-bttns").append("a")
+                                .attr("class", "waves-effect waves-light btn")
+                                .text("+")
+                                .attr("transform", "translate(0,0)")
+                                .on("click", function() {
+                                    d3.select("#coutry-map-group").transition().call(zoom.scaleBy, 1.2);
+                                    d3.select("#city-map-group").transition().call(zoom.scaleBy, 1.2);
+                                });
+
+    d3.select("#zoom-country-bttns").append("a")
+                                .attr("class", "waves-effect waves-light btn")
+                                .text("-")
+                                .attr("transform", "translate(0,0)")
+                                .on("click", function() {
+                                    d3.select("#coutry-map-group").transition().call(zoom.scaleBy, 0.8);
+                                    d3.select("#city-map-group").transition().call(zoom.scaleBy, 0.8);
+                                });
+
+};
 
 
 // function updateCountryMap(selectedCountry, cities) {
-//     const selectedCountryId = selectedCountry.properties.geoname_id;
+//     console.log(selectedCountry);
+//     const selectedCountryId = selectedCountry.properties.name;
 
 //     console.log(selectedCountry.properties.name);
 
