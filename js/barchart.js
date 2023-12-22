@@ -297,6 +297,8 @@ function createTable(container, data) {
      const xColumn = top.topfeatures[xOption];
      const yColumn = top.topfeatures[yOption];
 
+     let filteredData = data.filter(d => d[xColumn] !== '' && d[yColumn] !== '');
+
      const xScale = d3.scaleLinear()
          .domain([0, d3.max(data, d => d[xColumn])])
          .range([0, top.SVG_W]);
@@ -304,6 +306,12 @@ function createTable(container, data) {
      const yScale = d3.scaleLinear()
          .domain([0, d3.max(data, d => d[yColumn])])
          .range([top.SVG_H/2, 0]);
+
+     const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+     const legend = scatterPlot.append("g")
+                                .attr("class", "legend")
+                                .attr("transform", `translate(${top.SVG_W - 150}, 10)`);
 
      // Ось X
      scatterPlot.append("g")
@@ -324,57 +332,69 @@ function createTable(container, data) {
          .attr("y", 30)   // Расположение подписи слева от оси Y
          .style("text-anchor", "middle")
          .text(yOption);
-
-    scatterPlot.append("text")
-         .attr("x", top.SVG_W / 2)
-         .attr("y", top.SVG_H / 2 + 40)
-         .style("text-anchor", "middle")
-         .style("font-weight", "bold")
-         .text(`Scatter Plot: ${yOption} vs ${xOption}`);
  
      // Добавление подписей осей
      scatterPlot.append("text")
          .attr("x", top.SVG_W / 2)
-         .attr("y", 50)
+         .attr("y", top.SVG_H / 2 + 40)
          .style("text-anchor", "middle")
          .style("font-weight", "bold")
-         .text(xOption);
+         .text(xOption + ", USD");
  
      scatterPlot.append("text")
-         .attr("x", -top.SVG_H/2 + 150)
+         .attr("x", -top.SVG_H/4)
          .attr("y", 20)
          .attr("transform", "rotate(-90)")
          .style("text-anchor", "middle")
          .style("font-weight", "bold")
-         .text(yOption);
+         .text(yOption+", USD");
 
      const tooltip = d3.select("body").append("div")
          .attr("class", "tooltip")
          .style("opacity", 0);
 
      scatterPlot.selectAll('circle')
-         .data(data)
+         .data(filteredData)
          .enter().append('circle')
          .attr('cx', d => xScale(d[xColumn]))
          .attr('cy', d => yScale(d[yColumn]))
          .attr('r', 3)
          .attr("transform", "translate(50, 0)")
-         .attr('fill', 'lightblue')
+         .attr('fill', d => colorScale(d.country))
          .style("opacity", 0.7)
          .on("mouseover", function (event, d) {
              // Показать всплывающую подсказку при наведении мыши
-             tooltip.transition()
-                 .duration(200)
-                 .style("opacity", 0.9);
-             tooltip.html(d.city)
-                 .style("left", (event.pageX + 5) + "px")
-                 .style("top", (event.pageY - 18) + "px");
+             scatterPlot.append("text")
+            .attr("class", "tooltip-label")
+            .attr("x", xScale(d[xColumn]) + 55) // Adjust the x-coordinate of the tooltip label
+            .attr("y", yScale(d[yColumn]) - 5)  // Adjust the y-coordinate of the tooltip label
+            .text(d.city+", "+d.country);
+
+            const currentColor = colorScale(d.country);
+            scatterPlot.selectAll('circle')
+                        .filter(circle => colorScale(circle.country) === currentColor)
+                        .attr('r', 5);
+ 
+            legend.append("rect")
+                        .attr("width", 12)
+                        .attr("height", 12)
+                        .attr("fill", currentColor);
+ 
+            legend.append("text")
+                        .attr("x", 12 + 4)
+                        .attr("y", 12)
+                        .text(d.country)
+                        .style("font-weight", "bold")
+                        .attr("fill", currentColor);
          })
          .on("mouseout", function (d) {
              // Скрыть всплывающую подсказку при уходе мыши
-             tooltip.transition()
-                 .duration(500)
-                 .style("opacity", 0);
+             scatterPlot.select(".tooltip-label").remove();
+             //legend.attr("visibility", "hidden");
+             scatterPlot.selectAll('circle')
+                        .attr('r', 3);
+            legend.selectAll("rect").remove();
+            legend.selectAll("text").remove();
          });
 
     container.appendChild(scatterPlot.node());
